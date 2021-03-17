@@ -1,13 +1,47 @@
-version: 3
+version: "3"
+
+services:
   api:
-    container_name: apiServer
-    restart: always
-    build: .
-    ports:
-      - "80:4000"
-  
-  database:
-    container_name: mysqlServer
+      container_name: api
+      restart: always
+      build: .
+      ports:
+        - "80:4000"
+      volumes:
+        - .:/usr/src/app
+      links:
+        - db
+    
+  db:
+    container_name: db
     image: mysql
     ports: 
       - "3306:3306"
+    restart: always
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 6410050
+      MYSQL_DATABASE: app_db
+      MYSQL_USER: db_user
+      MYSQL_PASSWORD: db_user_pass
+    logging:
+      driver: none
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    logging:
+      driver: none
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
+volumes:
+  dbdata:
